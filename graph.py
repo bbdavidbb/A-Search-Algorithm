@@ -115,27 +115,27 @@ def a_star(initial_state, final_state, heuristic):
 
     """
     p_queue = PriorityQueue() # open list
-    states_taken = [] # closed list
-    current = Node(initial_state, None, None)
+    states_taken = [] # closed list will maintain nodes with have already seen
+    current = Node(initial_state, None, None) # initial node
 
+    # Add state to the p_queue if it has not been seen
     def add_state(n_state, direction):
-        if state_is_valid(n_state, states_taken):
-            node_to_add = Node(n_state, current, direction)
-            cost = node_to_add.num_parents + heuristic(node_to_add.state, final_state) # heuristic function
-            p_queue.put( (cost, node_to_add) )
-
+        if state_is_valid(n_state, states_taken): # detertermine if the state has not been seen
+            node_to_add = Node(n_state, current, direction) # make state a node
+            cost = node_to_add.num_parents + heuristic(node_to_add.state, final_state) # compute heuristic cost
+            p_queue.put( (cost, node_to_add) ) # insert node into priority queue according to computed cost
 
     while current.state != final_state:
-        insort(states_taken, current.state)
-        add_state(up(current.state), "up")
+        insort(states_taken, current.state)  # put current into states_taken while maintain sorted order for searching
+        add_state(up(current.state), "up")  # go through all directions and add their nodes to states_taken if valid
         add_state(down(current.state), "down")
         add_state(left(current.state), "left")
         add_state(right(current.state), "right")
 
-        if not p_queue.qsize() == 0:
+        if not p_queue.qsize() == 0:  # deque from p_queue and make that node current node to search
             _, n_add = p_queue.get_nowait()
             current = n_add
-        else: # failed to find a solution
+        else: # failed to find a solution i.e we're cycling through nodes we have already seen
             return len(states_taken), None
 
     return len(states_taken), current
